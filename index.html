@@ -23,6 +23,9 @@
   .stats-bar { display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
   .stats-bar .sitem { font-size: 13px; color: #666; }
   .stats-bar .sitem strong { color: #1a1a1a; }
+  .stat-card { background: #f5f5f5; border-radius: 10px; padding: 18px 24px; text-align: center; flex: 1; min-width: 140px; }
+  .stat-num { font-size: 28px; font-weight: 700; color: #1a1a1a; }
+  .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
   
   nav { background: #fff; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
   nav .container { display: flex; gap: 0; }
@@ -114,16 +117,16 @@
     <div class="subtitle">Dual-Compartment Proteomics of the Epileptic Human Brain</div>
     <div class="desc">
       <p>Paired proteomic analysis of <span class="badge badge-a">Microvessels (BBB)</span> and <span class="badge badge-b">PSD Fraction (Neuronal)</span> from 5 epilepsy patients, comparing the epileptic hippocampus against the temporal pole (within-patient control).</p>
-    </div>
-    <img src="pipeline.png" alt="Experimental pipeline: temporal lobe epilepsy patients, microdissection, vessel preparation, LC/MS quantification" class="pipeline-img" style="margin-top: 20px; margin-bottom: 20px;">
-    <div class="desc">
       <p>Proteins are shown as log2 fold-change (hippocampus vs. cortex) per patient. Positive values indicate higher abundance in the epileptic hippocampus.</p>
     </div>
-    <div class="stats-bar">
-      <div class="sitem"><strong>1391</strong> proteins in microvessels</div>
-      <div class="sitem"><strong>7189</strong> proteins in PSD fraction</div>
-      <div class="sitem"><strong>80</strong> ligand-receptor pairs</div>
-      <div class="sitem"><strong>5</strong> paired patients</div>
+    <h1 style="margin-top: 32px; margin-bottom: 16px;">Experimental Pipeline</h1>
+    <img src="pipeline.png" alt="Experimental pipeline: temporal lobe epilepsy patients, microdissection, vessel preparation, LC/MS quantification" class="pipeline-img">
+    <h1 style="margin-top: 32px; margin-bottom: 16px;">Overview</h1>
+    <div class="stats-bar" style="margin-bottom: 24px;">
+      <div class="stat-card"><div class="stat-num">1,391</div><div class="stat-label">Microvessel proteins</div></div>
+      <div class="stat-card"><div class="stat-num">7,189</div><div class="stat-label">PSD fraction proteins</div></div>
+      <div class="stat-card"><div class="stat-num">80</div><div class="stat-label">Ligand-receptor pairs</div></div>
+      <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Paired patients</div></div>
     </div>
   </div>
 </div>
