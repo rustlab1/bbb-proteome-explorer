@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BBB Proteome Explorer | Epilepsy Brain Proteomics</title>
+<title>Vascular and synaptic proteomes reveal blood-brain barrier disruption and postsynaptic remodeling in human temporal lobe epilepsy</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -12,13 +12,24 @@
   .header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 40px 0 30px; }
   .pipeline-img { width: 100%; max-width: 900px; display: block; margin: 0 auto 24px; }
   .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-  h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 8px; }
+  h1 { font-size: 28px; font-weight: 600; letter-spacing: 0; line-height: 1.2; margin-bottom: 8px; }
+  .paper-title { max-width: 980px; }
+  .header-section-title { font-size: 20px; margin: 32px 0 14px; }
   .subtitle { color: #666; font-size: 15px; margin-bottom: 16px; }
   .desc { color: #444; font-size: 14px; max-width: 800px; }
   .desc p { margin-bottom: 8px; }
+  .summary-box { max-width: 900px; background: #fbfbfb; border: 1px solid #dedede; border-left: 4px solid #8b949e; border-radius: 8px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+  .summary-box p:last-child { margin-bottom: 0; }
   .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; margin-right: 6px; }
   .badge-a { background: #fce8e6; color: #c62828; }
   .badge-b { background: #e8f0fe; color: #1565c0; }
+  .legend-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 8px 0 20px; }
+  .legend-item { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .legend-up { background: #d97706; }
+  .legend-down { background: #059669; }
+  .legend-na { background: #d6d6d6; }
+  .legend-sig { border: 2px solid #1a1a1a; background: #fff; }
   
   .stats-bar { display: flex; gap: 24px; margin-top: 16px; flex-wrap: wrap; }
   .stats-bar .sitem { font-size: 13px; color: #666; }
@@ -48,9 +59,11 @@
   .autocomplete div:hover { background: #f5f5f5; }
   .autocomplete .gene-name { font-weight: 600; }
   .autocomplete .gene-desc { color: #888; font-size: 12px; }
-  .autocomplete .gene-sig { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 4px; }
+  .autocomplete .gene-sig { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
   
   .protein-result { background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; padding: 24px; margin-bottom: 20px; }
+  .protein-result.is-sig { border-color: #c9a46a; border-left: 5px solid #b7791f; box-shadow: 0 2px 10px rgba(183, 121, 31, 0.08); }
+  .protein-result.is-ns { border-left: 5px solid #d6d6d6; }
   .protein-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
   .protein-header h3 { font-size: 18px; font-weight: 600; }
   .protein-header .meta { font-size: 12px; color: #888; }
@@ -58,8 +71,8 @@
   .stat { text-align: center; padding: 10px 14px; background: #f8f8f8; border-radius: 6px; min-width: 90px; }
   .stat-val { font-size: 16px; font-weight: 600; }
   .stat-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-up { color: #c62828; }
-  .stat-down { color: #1565c0; }
+  .stat-up { color: #b45309; }
+  .stat-down { color: #047857; }
   .chart-container { height: 250px; }
   
   /* Top DEPs */
@@ -88,16 +101,27 @@
   .lr-table th { background: #f8f8f8; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 1px solid #e0e0e0; }
   .lr-table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; }
   .lr-table tr:hover td { background: #fafafa; }
-  .fc-pos { color: #c62828; font-weight: 500; }
-  .fc-neg { color: #1565c0; font-weight: 500; }
+  .fc-pos { color: #b45309; font-weight: 600; }
+  .fc-neg { color: #047857; font-weight: 600; }
   .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
   .tag-conc { background: #e6f4ea; color: #137333; }
   .tag-disc { background: #fce8e6; color: #c62828; }
   .tag-stim { background: #e8f0fe; color: #1565c0; }
-  .tag-inhib { background: #f3e8fd; color: #7627bb; }
-  .tag-sig { background: #fff3e0; color: #e65100; font-size: 10px; }
-  .tag-ns { background: #f5f5f5; color: #999; font-size: 10px; }
+  .tag-sig { background: #fff7ed; color: #9a3412; border: 1px solid #fed7aa; font-size: 10px; }
+  .tag-ns { background: #f5f5f5; color: #777; border: 1px solid #e5e5e5; font-size: 10px; }
   .arrow { color: #999; }
+
+  /* Candidate compounds */
+  .drug-table-wrap { overflow-x: auto; }
+  .drug-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; font-size: 13px; }
+  .drug-table th { background: #f8f8f8; padding: 10px 12px; text-align: left; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+  .drug-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .drug-table tr:hover td { background: #fafafa; }
+  .drug-score { font-weight: 600; color: #5f3dc4; }
+  .drug-muted { color: #aaa; }
+  .drug-note { color: #777; font-size: 12px; margin-top: 10px; }
+  .tier-1 { background: #e6f4ea; color: #137333; }
+  .tier-2 { background: #fff7ed; color: #9a3412; }
   
   footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 24px 0; text-align: center; color: #999; font-size: 12px; }
   
@@ -113,20 +137,22 @@
 
 <div class="header">
   <div class="container">
-    <h1>BBB Proteome Explorer</h1>
-    <div class="subtitle">Dual-Compartment Proteomics of the Epileptic Human Brain</div>
-    <div class="desc">
-      <p>Paired proteomic analysis of <span class="badge badge-a">Microvessels (BBB)</span> and <span class="badge badge-b">PSD Fraction (Neuronal)</span> from 5 epilepsy patients, comparing the epileptic hippocampus against the temporal pole (within-patient control).</p>
+    <h1 class="paper-title">Vascular and synaptic proteomes reveal blood-brain barrier disruption and postsynaptic remodeling in human temporal lobe epilepsy</h1>
+    <div class="subtitle">Interactive data companion for human MTLE microvessel and PSD-enriched fractions</div>
+    <h1 class="header-section-title">Summary</h1>
+    <div class="desc summary-box">
+      <p>This explorer accompanies a study of <span class="badge badge-a">Microvessels (BBB)</span> and <span class="badge badge-b">PSD Fraction (Neuronal)</span> isolated from matched epileptic hippocampus and ipsilateral temporal pole tissue from five patients with drug-resistant MTLE.</p>
+      <p>The data map BBB disruption, vascular inflammation, synaptic remodeling, mitochondrial dysfunction, and neurovascular ligand-receptor changes, with GTEx cross-referencing used to separate disease-associated signals from baseline regional differences.</p>
       <p>Proteins are shown as log2 fold-change (hippocampus vs. temporal pole) per patient. Positive values indicate higher abundance in the epileptic hippocampus.</p>
     </div>
-    <h1 style="margin-top: 32px; margin-bottom: 16px;">Experimental Pipeline</h1>
+    <h1 class="header-section-title">Experimental Pipeline</h1>
     <img src="pipeline.png" alt="Experimental pipeline: temporal lobe epilepsy patients, microdissection, vessel preparation, LC/MS quantification" class="pipeline-img">
-    <h1 style="margin-top: 32px; margin-bottom: 16px;">Overview</h1>
+    <h1 class="header-section-title">Overview</h1>
     <div class="stats-bar" style="margin-bottom: 24px;">
       <div class="stat-card"><div class="stat-num">1,541</div><div class="stat-label">Microvessel proteins</div></div>
       <div class="stat-card"><div class="stat-num">7,450</div><div class="stat-label">PSD fraction proteins</div></div>
       <div class="stat-card"><div class="stat-num">53</div><div class="stat-label">Ligand-receptor pairs</div></div>
-      <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Paired patients</div></div>
+      <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">Patients</div></div>
     </div>
   </div>
 </div>
@@ -136,6 +162,7 @@
     <a href="#search" class="active" onclick="setActive(this)">Protein Search</a>
     <a href="#topdeps" onclick="setActive(this)">Top DEPs</a>
     <a href="#lr" onclick="setActive(this)">Ligand-Receptor</a>
+    <a href="#drugs" onclick="setActive(this)">Compounds</a>
   </div>
 </nav>
 
@@ -160,7 +187,7 @@
 <section id="topdeps">
   <div class="container">
     <h2>Top Differentially Expressed Proteins</h2>
-    <div class="section-desc">Most upregulated and downregulated proteins in each fraction (hippocampus vs. temporal pole). Click any protein to see per-patient data.</div>
+    <div class="section-desc">Differentially expressed proteins with the largest positive and negative hippocampus vs. temporal pole changes. Click any protein to see per-patient data.</div>
     
     <div class="dep-grid">
       <div class="dep-panel">
@@ -169,8 +196,8 @@
           <div class="meta">439 DEPs of 1,541 total</div>
         </div>
         <div class="dep-toggle" id="toggleA">
-          <button class="active" onclick="showDeps('a','up',this)">Most Upregulated</button>
-          <button onclick="showDeps('a','down',this)">Most Downregulated</button>
+          <button class="active" onclick="showDeps('a','up',this)">Higher in HPC</button>
+          <button onclick="showDeps('a','down',this)">Lower in HPC</button>
         </div>
         <div class="dep-list" id="depListA"></div>
       </div>
@@ -180,8 +207,8 @@
           <div class="meta">1,881 DEPs of 7,450 total</div>
         </div>
         <div class="dep-toggle" id="toggleB">
-          <button class="active" onclick="showDeps('b','up',this)">Most Upregulated</button>
-          <button onclick="showDeps('b','down',this)">Most Downregulated</button>
+          <button class="active" onclick="showDeps('b','up',this)">Higher in HPC</button>
+          <button onclick="showDeps('b','down',this)">Lower in HPC</button>
         </div>
         <div class="dep-list" id="depListB"></div>
       </div>
@@ -193,7 +220,7 @@
 <section id="lr">
   <div class="container">
     <h2>Ligand-Receptor Interactions</h2>
-    <div class="section-desc">Curated 53-pair cross-compartment signaling set between vessel and PSD fractions. Concordant pairs change in the same direction; discordant pairs change in opposite directions.</div>
+    <div class="section-desc">Curated 53-pair cross-compartment signaling set from OmniPath ligand-receptor mapping between vessel and PSD fractions. Concordant pairs change in the same direction; discordant pairs change in opposite directions.</div>
     
     <div class="lr-controls">
       <button class="lr-btn active" onclick="filterLR('all', this)">All (53)</button>
@@ -221,9 +248,117 @@
   </div>
 </section>
 
+<!-- Candidate Compounds -->
+<section id="drugs">
+  <div class="container">
+    <h2>Candidate Compounds</h2>
+    <div class="section-desc">Selected CMap reversal candidates from the vessel, PSD, and combined proteomic signatures. Positive scores indicate predicted reversal of the epileptic hippocampus signature toward the temporal pole state. These are computational candidates, not validated treatments.</div>
+
+    <div class="drug-table-wrap">
+      <table class="drug-table">
+        <thead>
+          <tr>
+            <th>Compound</th>
+            <th>Class</th>
+            <th>CMap panel</th>
+            <th>Vessel</th>
+            <th>PSD</th>
+            <th>Combined</th>
+            <th>Network hops</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Foretinib</strong></td>
+            <td>MET/VEGFR inhibitor</td>
+            <td>Vessel</td>
+            <td class="drug-score">4.12</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-muted">N/A</td>
+            <td>1.00</td>
+          </tr>
+          <tr>
+            <td><strong>Bicalutamide</strong></td>
+            <td>Androgen receptor antagonist</td>
+            <td>Vessel</td>
+            <td class="drug-score">3.87</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-muted">N/A</td>
+            <td>1.00</td>
+          </tr>
+          <tr>
+            <td><strong>Sirolimus</strong></td>
+            <td>mTOR inhibitor</td>
+            <td>Combined / Vessel</td>
+            <td class="drug-score">3.54</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-score">2.91</td>
+            <td>1.33</td>
+          </tr>
+          <tr>
+            <td><strong>Insulin</strong></td>
+            <td>Hormone</td>
+            <td>Vessel</td>
+            <td class="drug-score">3.21</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-muted">N/A</td>
+            <td>1.50</td>
+          </tr>
+          <tr>
+            <td><strong>Sorafenib</strong></td>
+            <td>Multi-kinase inhibitor</td>
+            <td>Combined / Vessel</td>
+            <td class="drug-score">2.98</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-score">2.67</td>
+            <td>1.82</td>
+          </tr>
+          <tr>
+            <td><strong>Isotretinoin</strong></td>
+            <td>Retinoid</td>
+            <td>Combined / PSD / Vessel</td>
+            <td class="drug-score">2.43</td>
+            <td class="drug-score">2.11</td>
+            <td class="drug-score">2.38</td>
+            <td>2.00</td>
+          </tr>
+          <tr>
+            <td><strong>Bexarotene</strong></td>
+            <td>Retinoid</td>
+            <td>Combined / PSD / Vessel</td>
+            <td class="drug-score">2.19</td>
+            <td class="drug-score">1.98</td>
+            <td class="drug-score">2.22</td>
+            <td>2.00</td>
+          </tr>
+          <tr>
+            <td><strong>Anastrozole</strong></td>
+            <td>Aromatase inhibitor</td>
+            <td>PSD</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-score">2.54</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-muted">N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Vemurafenib</strong></td>
+            <td>BRAF inhibitor</td>
+            <td>Vessel</td>
+            <td class="drug-score">2.31</td>
+            <td class="drug-muted">N/A</td>
+            <td class="drug-muted">N/A</td>
+            <td>2.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="drug-note">Vessel, PSD, and combined columns show CMap reversal scores for each analysis panel. Higher positive values indicate stronger predicted signature reversal. Network hops indicate mean shortest-path proximity from known drug targets to the ECM-integrin module. Lower values indicate closer network proximity. N/A means the compound was not retained as a top candidate in that panel.</div>
+  </div>
+</section>
+
 <footer>
   <div class="container">
-    BBB Proteome Explorer &middot; Rust Lab, University of Southern California &middot; Data from paired epilepsy patient samples (n=5)
+    BBB Proteome Explorer &middot; Rust Lab, University of Southern California &middot; Data from MTLE patient samples (n=5)
   </div>
 </footer>
 
@@ -264,7 +399,7 @@ input.addEventListener('input', function() {
     if (info.a) fracs.push('MV');
     if (info.b) fracs.push('PSD');
     var anySig = (info.a && info.a.sig) || (info.b && info.b.sig);
-    var sigDot = anySig ? '<span class="gene-sig" style="background:#e65100;"></span>' : '<span class="gene-sig" style="background:#ccc;"></span>';
+    var sigDot = anySig ? '<span class="gene-sig" style="background:#b7791f;"></span>' : '<span class="gene-sig" style="background:#ccc;"></span>';
     return '<div onclick="selectGene(\'' + g + '\')">' + sigDot + '<span class="gene-name">' + g + '</span> <span class="gene-desc">&middot; ' + desc + ' (' + fracs.join(', ') + ')</span></div>';
   }).join('');
   ac.style.display = 'block';
@@ -305,11 +440,12 @@ function showProtein(gene) {
 function buildProteinCard(p, fraction, id) {
   var hasMean = p.mean !== null && !Number.isNaN(p.mean);
   var dirClass = !hasMean ? '' : (p.dir === 'Up' ? 'stat-up' : 'stat-down');
-  var dirLabel = !hasMean ? 'N/A' : (p.dir === 'Up' ? '\u2191 Up in Hippocampus' : '\u2193 Down in Hippocampus');
+  var dirLabel = !hasMean ? 'N/A' : (p.dir === 'Up' ? '\u2191 Higher in HPC' : '\u2193 Lower in HPC');
   var meanStr = hasMean ? ((p.mean > 0 ? '+' : '') + p.mean.toFixed(2)) : 'N/A';
   var qvalStr = p.qval !== null ? (p.qval < 0.001 ? '<0.001' : p.qval.toFixed(3)) : 'N/A';
-  var sigTag = p.sig ? '<span class="tag tag-sig">DEP</span>' : '<span class="tag tag-ns">n.s.</span>';
-  return '<div class="protein-result">' +
+  var sigTag = p.sig ? '<span class="tag tag-sig">Significant DEP</span>' : '<span class="tag tag-ns">Not significant</span>';
+  var sigClass = p.sig ? 'is-sig' : 'is-ns';
+  return '<div class="protein-result ' + sigClass + '">' +
     '<div class="protein-header"><div><h3>' + p.gene + ' ' + sigTag + '</h3>' +
     '<div class="meta">' + p.desc + ' &middot; ' + p.acc + '</div></div>' +
     '<span class="badge badge-' + id + '">' + fraction + '</span></div>' +
@@ -318,21 +454,28 @@ function buildProteinCard(p, fraction, id) {
     '<div class="stat"><div class="stat-val">' + qvalStr + '</div><div class="stat-label">q-value</div></div>' +
     '<div class="stat"><div class="stat-val ' + dirClass + '">' + dirLabel + '</div><div class="stat-label">Direction</div></div>' +
     '<div class="stat"><div class="stat-val">' + p.patients.filter(function(v){return v!==null;}).length + '/5</div><div class="stat-label">Patients</div></div>' +
+    '</div><div class="legend-row">' +
+    '<span class="legend-item"><span class="legend-swatch legend-up"></span>Higher in HPC</span>' +
+    '<span class="legend-item"><span class="legend-swatch legend-down"></span>Lower in HPC</span>' +
+    '<span class="legend-item"><span class="legend-swatch legend-na"></span>Not detected</span>' +
+    '<span class="legend-item"><span class="legend-swatch legend-sig"></span>q <= 0.05</span>' +
     '</div><div class="chart-container"><canvas id="chart_' + id + '"></canvas></div></div>';
 }
 
 function renderBarChart(canvasId, p, id) {
   var ctx = document.getElementById(canvasId).getContext('2d');
   var vals = p.patients.map(function(v){ return v === null ? null : v; });
-  var posColor = id === 'a' ? '#ef5350' : '#42a5f5';
-  var negColor = id === 'a' ? '#ef9a9a' : '#90caf9';
+  var posColor = '#d97706';
+  var negColor = '#059669';
   var naColor = '#e0e0e0';
   var colors = vals.map(function(v, i){ return p.patients[i] === null ? naColor : (v >= 0 ? posColor : negColor); });
+  var borders = colors.map(function(c){ return c === naColor ? '#bdbdbd' : (p.sig ? '#1a1a1a' : c); });
+  var borderWidths = colors.map(function(c){ return c === naColor ? 1 : (p.sig ? 2 : 1); });
   return new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['Patient 1', 'Patient 2', 'Patient 3', 'Patient 4', 'Patient 5'],
-      datasets: [{ data: vals, backgroundColor: colors, borderColor: colors.map(function(c){ return c === naColor ? '#ccc' : c; }), borderWidth: 1, borderRadius: 3 }]
+      datasets: [{ data: vals, backgroundColor: colors, borderColor: borders, borderWidth: borderWidths, borderRadius: 3 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -380,7 +523,6 @@ function renderLR(data) {
     var recClass = r.rec_fc >= 0 ? 'fc-pos' : 'fc-neg';
     var typeClass = r.type === 'Concordant' ? 'tag-conc' : 'tag-disc';
     var signalTags = r.pathway ? '<span class="tag tag-stim">' + r.pathway + '</span> ' : '';
-    if (r.immune) signalTags += '<span class="tag tag-inhib">immune-flagged</span> ';
     return '<tr><td><strong>' + r.ligand + '</strong></td><td class="arrow">&rarr;</td><td><strong>' + r.receptor + '</strong></td>' +
       '<td class="' + ligClass + '">' + (r.lig_fc > 0 ? '+' : '') + r.lig_fc.toFixed(2) + '</td>' +
       '<td class="' + recClass + '">' + (r.rec_fc > 0 ? '+' : '') + r.rec_fc.toFixed(2) + '</td>' +
